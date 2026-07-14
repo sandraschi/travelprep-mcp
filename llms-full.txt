@@ -1,0 +1,59 @@
+# travelprep-mcp -- full reference
+
+Trip preparation MCP server. FastMCP 3.2+, Python 3.12+, dual transport
+(stdio default; HTTP `/mcp` on port 11099 via `MCP_TRANSPORT=http`).
+
+## Tool: stays
+
+```
+stays(
+    operation: "search" | "details",
+    provider: "airbnb" | "booking",
+    location: str | None = None,       # required for operation="search"
+    listing_id: str | None = None,     # required for operation="details"
+                                        # (airbnb: numeric id; booking: full hotel URL)
+    checkin: str | None = None,        # YYYY-MM-DD; required for provider="booking" search
+    checkout: str | None = None,       # YYYY-MM-DD; required for provider="booking" search
+    adults: int = 1,
+    children: int = 0,
+    min_price: int | None = None,      # airbnb only
+    max_price: int | None = None,      # airbnb only
+) -> dict
+```
+
+Backed by:
+- `openbnb-org/mcp-server-airbnb` (MIT) via `npx -y @openbnb/mcp-server-airbnb --ignore-robots-txt`, subprocess stdio
+- `insprd/hotelzero` (MIT) via `npx -y hotelzero`, subprocess stdio, Playwright-driven
+
+Known issues (confirmed live, not theoretical):
+- Airbnb location matching is loose (Photon -> Nominatim fallback, 25% bbox padding)
+- Booking.com bot-detects the scraper; expect occasional blocked-then-retried searches
+
+## Tool: destination
+
+```
+destination(
+    operation: "overview" | "weather" | "practical" | "full",
+    place: str,
+    forecast_days: int = 7,            # weather/full only, 1-16
+) -> dict
+```
+
+All free, keyless sources:
+- Wikipedia REST summary API (overview)
+- Wikivoyage REST summary API (practical)
+- Open-Meteo geocoding + forecast (weather; also used to resolve country for practical)
+- REST Countries (currency, languages, calling code, capital, timezones)
+
+Returns `available: false` with a `reason` string per section on a miss,
+never fabricated data.
+
+## Not yet implemented
+
+- Booking.com: `find_hotels` (80+ filters), `compare_hotels`,
+  `check_availability`, `get_reviews`, `get_price_calendar` -- all
+  confirmed present on the upstream server, none wired into `stays` yet
+- Webapp / Prefab UI cards
+- MCPB packaging / Tauri desktop wrapper
+- Destination sources beyond the four listed (no OpenStreetMap POI
+  layer, no visa/entry-requirement source, no currency conversion)

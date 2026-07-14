@@ -1,0 +1,12 @@
+import asyncio
+
+from travelprep_mcp.server import mcp
+
+
+async def main():
+    tools = await mcp.list_tools()
+    for name, tool in tools.items():
+        print(f"- {name}: {tool.description[:80]}")
+
+
+asyncio.run(main())
