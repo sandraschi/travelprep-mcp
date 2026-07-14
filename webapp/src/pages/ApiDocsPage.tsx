@@ -1,14 +1,14 @@
 import { useCallback, useRef, useState } from "react";
 import { ExternalLink, Code2 } from "lucide-react";
 
-const API_BASE = "http://127.0.0.1:11099";
+const BACKEND_ORIGIN = "http://127.0.0.1:11099";
 
 const representativeEndpoints = [
   { method: "GET", path: "/api/health", description: "Server health & status" },
   { method: "GET", path: "/api/tools", description: "List all MCP tools" },
   { method: "GET", path: "/api/capabilities", description: "Server capabilities" },
   { method: "GET", path: "/api/skills", description: "Available skills" },
-  { method: "POST", path: "/api/chat/stream", description: "Chat completion" },
+  { method: "GET", path: "/skill/{name}", description: "Raw SKILL.md content" },
   { method: "GET", path: "/api/llm/discover", description: "LLM provider discovery" },
 ];
 
@@ -53,7 +53,12 @@ export default function ApiDocsPage() {
     }
   }, []);
 
-  const docsUrl = docsView === "swagger" ? `${API_BASE}/docs` : `${API_BASE}/redoc`;
+  // Relative path -- goes through the Vite dev-server proxy (vite.config.ts)
+  // so the iframe is same-origin, letting injectDarkTheme reach contentDocument.
+  // A direct cross-origin src (http://127.0.0.1:11099) would silently block
+  // the CSS injection due to browser same-origin policy.
+  const docsUrl = docsView === "swagger" ? "/docs" : "/redoc";
+  const openInBrowserUrl = docsView === "swagger" ? `${BACKEND_ORIGIN}/docs` : `${BACKEND_ORIGIN}/redoc`;
 
   return (
     <div data-testid="api-docs" className="p-6 space-y-4 h-full flex flex-col">
@@ -82,7 +87,7 @@ export default function ApiDocsPage() {
             </button>
           </div>
           <a
-            href={docsUrl}
+            href={openInBrowserUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg bg-zinc-800 text-slate-400 hover:text-white hover:bg-zinc-700 transition-colors"

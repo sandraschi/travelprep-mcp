@@ -1,7 +1,9 @@
 # travelprep-mcp
 
-**Trip preparation MCP server (v0.1.0)** -- FastMCP 3.4+, dual transport
-(stdio + HTTP `/mcp` on port **11099**). Four tools: `stays` (Airbnb +
+**Trip preparation MCP server (v0.1.0)** -- FastMCP 3.4+ tools mounted
+under FastAPI (dual transport: stdio + MCP streamable-HTTP at `/mcp` on
+port **11099**, plus a real FastAPI REST layer with auto-generated
+`/docs`/`/redoc`). Four tools: `stays` (Airbnb +
 Booking.com, subprocess-wrapped open-source scrapers, no paid API keys),
 `hotel_extras` (Booking.com-only: filtered search, compare, availability,
 reviews, price calendar), `destination` (free-source
