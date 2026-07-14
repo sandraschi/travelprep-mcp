@@ -7,7 +7,7 @@ requires-python = ">=3.12"
 license = { text = "MIT" }
 authors = [{ name = "Sandra Schi" }]
 dependencies = [
-    "fastmcp>=3.2.0,<4",
+    "fastmcp>=3.4.3,<4",
     "httpx>=0.27",
     "pydantic>=2.7",
 ]

@@ -1,6 +1,6 @@
 # travelprep-mcp -- full reference
 
-Trip preparation MCP server. FastMCP 3.2+, Python 3.12+, dual transport
+Trip preparation MCP server. FastMCP 3.4+, Python 3.12+, dual transport
 (stdio default; HTTP `/mcp` on port 11099 via `MCP_TRANSPORT=http`).
 
 ## Tool: stays

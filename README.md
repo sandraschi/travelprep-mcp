@@ -1,10 +1,11 @@
 # travelprep-mcp
 
-**Trip preparation MCP server (v0.1.0)** -- FastMCP 3.2+, dual transport
-(stdio + HTTP `/mcp` on port **11099**). Two tools: `stays` (Airbnb +
-Booking.com, subprocess-wrapped open-source scrapers, no paid API keys)
-and `destination` (free-source overview/weather/practical info -- no
-API keys at all).
+**Trip preparation MCP server (v0.1.0)** -- FastMCP 3.4+, dual transport
+(stdio + HTTP `/mcp` on port **11099**). Three tools: `stays` (Airbnb +
+Booking.com, subprocess-wrapped open-source scrapers, no paid API keys),
+`hotel_extras` (Booking.com-only: filtered search, compare, availability,
+reviews, price calendar), and `destination` (free-source
+overview/weather/practical info -- no API keys at all).
 
 ## Status -- read this before trusting anything
 
@@ -45,9 +46,13 @@ Node.js + npx on PATH (already present on Goliath).
   with retry/backoff and UA rotation, but expect occasional "Request
   blocked by Booking.com" failures that resolve on retry, not always.
 - **`find_hotels`, `compare_hotels`, `check_availability`, `get_reviews`,
-  `get_price_calendar`** exist on the Booking.com side (confirmed via
-  live `list_tools()`) but aren't wired into the `stays` portmanteau
-  yet -- only `search_hotels` and `get_hotel_details`.
+  `get_price_calendar`** are now wired via the `hotel_extras` tool. Only
+  `search_hotels` and `get_hotel_details` (on `stays`) have been
+  individually live-invoked; the `hotel_extras` operations were wired
+  from the confirmed `list_tools()` schema but not each exercised with
+  a live call -- `find_hotels` was attempted live on 2026-07-14 and hit
+  Booking.com's bot-detection block, so treat response shapes as
+  unverified until confirmed.
 
 ## Tools
 
@@ -59,6 +64,19 @@ Node.js + npx on PATH (already present on Goliath).
   `checkin` + `checkout` (upstream-mandatory, Airbnb's are optional)
 - `details` needs `listing_id` (Airbnb: the numeric ID; Booking.com:
   the full hotel URL)
+
+### `hotel_extras(operation, ...)`
+
+Booking.com-only, beyond basic `stays` search/details.
+
+- `operation`: `"find_hotels"` | `"compare"` | `"check_availability"` | `"reviews"` | `"price_calendar"`
+- `find_hotels` needs `location`, `checkin`, `checkout`; optional `filters` dict (80+ upstream filter codes, passed through as-is)
+- `compare` needs `hotel_urls` (2-3 Booking.com URLs)
+- `check_availability` needs `hotel_url`, `checkin`, `checkout`
+- `reviews` needs `hotel_url`; optional `sort_by`/`filter_by`
+- `price_calendar` needs `hotel_url`, `price_calendar_start` (YYYY-MM-DD)
+
+Not yet individually live-verified beyond `find_hotels` (which hit a bot-detection block on the one live attempt so far) -- see Known limitations.
 
 ### `destination(operation, place, forecast_days=7)`
 
