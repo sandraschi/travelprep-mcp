@@ -5,6 +5,9 @@ MCP tools:
     hotel_extras(operation, ...)           -- Booking.com-only: find_hotels,
                                                compare, check_availability,
                                                reviews, price_calendar
+    account(operation)                     -- Booking.com trips/wishlist/rewards
+                                               via a locally-persisted login
+                                               session (see auth/booking_session.py)
     destination(operation, place, ...)     -- free-source destination info
 
 REST (webapp-facing, HTTP transport only, added via custom_route):
@@ -27,6 +30,7 @@ from starlette.requests import Request
 from starlette.responses import JSONResponse
 
 from travelprep_mcp import __version__
+from travelprep_mcp.tools.account import account as account_impl
 from travelprep_mcp.tools.destination import destination as destination_impl
 from travelprep_mcp.tools.hotel_extras import hotel_extras as hotel_extras_impl
 from travelprep_mcp.tools.stays import stays as stays_impl
@@ -110,6 +114,19 @@ async def hotel_extras(
         price_calendar_start=price_calendar_start,
         price_calendar_nights=price_calendar_nights,
     )
+
+
+@mcp.tool()
+async def account(operation: str) -> dict:
+    """Booking.com account access -- trips, wishlist, rewards.
+
+    operation: "login" | "status" | "trips" | "wishlist" | "rewards"
+
+    Uses a locally-persisted, isolated login session (never Sandra's
+    live default browser profile) -- run operation="login" once first.
+    No booking-execution capability exists anywhere in this server.
+    """
+    return await account_impl(operation=operation)  # type: ignore[arg-type]
 
 
 @mcp.tool()

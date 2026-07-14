@@ -17,6 +17,8 @@ what's real and what isn't, as of 2026-07-14:
 | `destination` tool (Wikipedia, Wikivoyage, Open-Meteo, REST Countries) | **Working.** 4/4 live tests pass against real APIs, no mocks. |
 | `stays` tool, Airbnb branch | **Working.** Live-tested end-to-end (`airbnb_search`, 18 real results). |
 | `stays` tool, Booking.com branch | **Working but fragile.** Live-tested end-to-end, but Booking.com actively bot-detects the Playwright browser -- first 2/3 attempts in testing were blocked before a retry succeeded. Don't hammer it. |
+| `hotel_extras` tool | **Wired, not live-verified.** `find_hotels` was attempted live and hit the same bot-detection block; `compare`/`check_availability`/`reviews`/`price_calendar` haven't been exercised at all. |
+| `account` tool (Booking.com trips/wishlist/rewards) | **Not live-tested at all.** Written 2026-07-14 with no logged-in session to test against -- every CSS selector and JSON-shape guess in `providers/booking_account.py` is unverified. Requires running `account(operation="login")` once (opens a headed browser) before anything else works. |
 | Webapp (React/Vite dashboard, Prefab cards) | **Not built yet.** Server is stdio/HTTP-only for v0.1. Ports 11099 (backend) / 11100 (frontend) are reserved in `WEBAPP_PORTS.md`. |
 | MCPB packaging, Tauri desktop wrapper | **Not built yet.** |
 | Playwright e2e (mandatory for webapp per fleet standard) | **N/A until webapp exists.** |
@@ -83,6 +85,32 @@ Not yet individually live-verified beyond `find_hotels` (which hit a bot-detecti
 - `operation`: `"overview"` | `"weather"` | `"practical"` | `"full"`
 - All free, keyless: Wikipedia + Wikivoyage REST summary APIs,
   Open-Meteo geocoding + forecast, REST Countries
+
+### `account(operation)`
+
+Booking.com account access: trips, wishlist, rewards.
+
+- `operation`: `"login"` | `"status"` | `"trips"` | `"wishlist"` | `"rewards"`
+- Run `login` once first -- opens a headed browser for an interactive
+  sign-in, session then persists in an isolated Chromium profile at
+  `~/.travelprep-mcp/booking-profile`, deliberately separate from
+  Sandra's daily Chrome profile (see `auth/booking_session.py`
+  docstring for why, vs. how third-party tools like
+  `booking-com-pp-cli` do live-Chrome cookie import instead)
+- `trips`/`wishlist`/`rewards` are UNVERIFIED -- written without a live
+  logged-in session to test selectors against; see
+  `providers/booking_account.py` docstring
+- No booking-execution tool exists anywhere in this server -- see
+  `budget.py` for why that's deliberate, not an oversight
+
+## Budget guardrail
+
+`budget.py` hardcodes `MAX_NIGHTLY_RATE_EUR = 300` and
+`MAX_TOTAL_TRIP_EUR = 1500`. Not a booking gate (no booking tool
+exists) -- a sanity pre-check any future price data can be run
+through, plus caps echoed into every `hotel_extras` response today.
+Per-result auto-flagging isn't wired in yet since the upstream price
+field shape isn't confirmed live.
 
 ## Run it
 

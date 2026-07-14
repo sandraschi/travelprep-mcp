@@ -11,6 +11,7 @@ from __future__ import annotations
 
 from typing import Any, Literal
 
+from travelprep_mcp import budget
 from travelprep_mcp.providers import booking_client
 
 HotelExtrasOperation = Literal[
@@ -86,4 +87,16 @@ async def hotel_extras(
     else:
         raise ValueError(f"Unknown operation: {operation}")
 
-    return {"operation": operation, "result": result}
+    return {
+        "operation": operation,
+        "result": result,
+        "budget_caps": {
+            "max_nightly_rate_eur": budget.MAX_NIGHTLY_RATE_EUR,
+            "max_total_trip_eur": budget.MAX_TOTAL_TRIP_EUR,
+            "note": (
+                "Caps echoed for reference; per-result auto-flagging against "
+                "these caps is not yet wired in because the upstream result "
+                "shape isn't confirmed live -- see module docstring."
+            ),
+        },
+    }
