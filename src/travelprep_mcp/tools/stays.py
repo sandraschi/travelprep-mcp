@@ -43,6 +43,13 @@ async def stays(
     provider's location filtering is tight -- results should be
     sanity-checked against returned coordinates for anything where
     precise geography matters. See individual provider docstrings.
+
+    ## Return Format
+    {"provider": str, "operation": str, "result": dict}
+
+    ## Examples
+    stays(operation="search", provider="airbnb", location="Paris", checkin="2026-08-01", checkout="2026-08-07")
+    stays(operation="details", provider="booking", listing_id="https://www.booking.com/hotel/fr/example")
     """
     if operation == "search":
         if not location:

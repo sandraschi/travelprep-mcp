@@ -46,6 +46,14 @@ async def hotel_extras(
         price_calendar      - needs hotel_url, price_calendar_start
                               (YYYY-MM-DD); finds cheapest dates over
                               price_calendar_nights nights
+
+    ## Return Format
+    {"operation": str, "result": dict, "budget_caps": {"max_nightly_rate_eur": int, "max_total_trip_eur": int, "note": str}}
+
+    ## Examples
+    hotel_extras(operation="find_hotels", location="London", checkin="2026-09-01", checkout="2026-09-07")
+    hotel_extras(operation="reviews", hotel_url="https://www.booking.com/hotel/gb/example")
+    hotel_extras(operation="price_calendar", hotel_url="https://www.booking.com/hotel/gb/example", price_calendar_start="2026-09-01")
     """
     if operation == "find_hotels":
         if not (location and checkin and checkout):

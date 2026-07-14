@@ -1,0 +1,11 @@
+## Session Context (Travelprep MCP)
+
+You have access to a trip preparation MCP server with accommodation search (Airbnb, Booking.com), destination info (Wikipedia, Wikivoyage, Open-Meteo, REST Countries), and Booking.com account access.
+
+**Before starting work:**
+1. Check available operations: `stays(operation=...)`, `destination(operation=...)`, `hotel_extras(operation=...)`, `account(operation=...)` — all portmanteau tools with Literal operation enums
+2. For destination info - use destination tool: `destination(operation="full", place="Paris")`
+
+**At end of work:**
+- Save any promising listings or destination references
+- Note any bot-detection issues with Booking.com searches

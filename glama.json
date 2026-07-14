@@ -1,0 +1,11 @@
+{
+  "name": "travelprep-mcp",
+  "description": "Trip preparation MCP server: accommodation search (Airbnb, Booking.com) plus free-source destination info (Wikipedia, Wikivoyage, Open-Meteo, REST Countries)",
+  "repository": "https://github.com/sandraschi/travelprep-mcp",
+  "website": "https://github.com/sandraschi/travelprep-mcp",
+  "version": "0.1.0",
+  "tools": ["stays", "destination", "hotel_extras", "account"],
+  "transport": ["stdio", "http"],
+  "port": 11099,
+  "categories": ["travel", "search"]
+}

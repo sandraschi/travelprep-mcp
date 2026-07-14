@@ -147,6 +147,14 @@ async def destination(
     All sources are free and require no API key. Returns available=False
     with a reason string per section if a source has no data, rather than
     guessing.
+
+    ## Return Format
+    {"place": str, "overview"|"weather"|"practical": {"available": bool, ...}}
+
+    ## Examples
+    destination(operation="full", place="Kyoto")
+    destination(operation="weather", place="Vienna", forecast_days=3)
+    destination(operation="overview", place="Machu Picchu")
     """
     async with httpx.AsyncClient(timeout=10.0) as client:
         if operation == "overview":

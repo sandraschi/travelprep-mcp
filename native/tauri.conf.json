@@ -1,0 +1,38 @@
+{
+  "productName": "Travelprep MCP",
+  "version": "0.1.0",
+  "identifier": "ai.fleet.travelprep-mcp",
+  "build": {
+    "frontendDist": "../webapp/dist",
+    "devUrl": "http://localhost:11100",
+    "beforeDevCommand": "npm --prefix ../webapp run dev",
+    "beforeBuildCommand": "pwsh -NoProfile -File ./build.ps1"
+  },
+  "app": {
+    "windows": [{
+      "label": "main",
+      "title": "Travelprep MCP",
+      "width": 1100,
+      "height": 750,
+      "minWidth": 700,
+      "minHeight": 500
+    }],
+    "security": { "csp": null }
+  },
+  "bundle": {
+    "active": true,
+    "targets": ["nsis"],
+    "icon": ["icons/icon.ico", "icons/icon.png"],
+    "resources": [
+      "resources/travelprep-mcp-backend.exe",
+      "resources/.env.example"
+    ],
+    "windows": {
+      "webviewInstallMode": { "type": "skip" },
+      "nsis": {
+        "installMode": "currentUser",
+        "installerHooks": "./windows/hooks.nsh"
+      }
+    }
+  }
+}

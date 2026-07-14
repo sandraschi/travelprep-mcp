@@ -22,16 +22,24 @@ async def account(operation: AccountOperation) -> dict[str, Any]:
 
     operation:
         login    - opens a headed browser window for Sandra to log in to
-                   Booking.com by hand; session then persists locally
+                    Booking.com by hand; session then persists locally
         status   - whether a local session profile exists (does not
-                   confirm it's still valid -- Booking.com may have
-                   expired it; a real fetch will surface that)
+                    confirm it's still valid -- Booking.com may have
+                    expired it; a real fetch will surface that)
         trips    - past and upcoming bookings
         wishlist - saved properties
         rewards  - Genius level / wallet / rewards balance
 
     No booking-execution capability exists here or anywhere in this
     server -- see budget.py for why that's a deliberate omission.
+
+    ## Return Format
+    {"operation": str, ...}  -- shape varies by operation
+
+    ## Examples
+    account(operation="login")
+    account(operation="status")
+    account(operation="trips")
     """
     if operation == "login":
         detected = await booking_session.login_interactive()

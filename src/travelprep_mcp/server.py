@@ -14,6 +14,12 @@ REST (webapp-facing, HTTP transport only, added via custom_route):
     GET  /api/capabilities                 -- mandatory capability introspection
     GET  /api/tools                        -- dynamic tool list for Tools Hub
     GET  /api/health                       -- liveness
+    GET  /api/skills                       -- list registered skills
+    GET  /skill/{name}                     -- raw SKILL.md content for one skill
+    GET  /api/llm/discover                 -- local Ollama/LM Studio auto-detection
+
+MCP resources:
+    skill://travelprep-expert/SKILL.md     -- same skill content, MCP resource form
 
 Run:
     uv run travelprep-mcp                  # stdio (default, for Claude Desktop etc)
@@ -24,16 +30,21 @@ from __future__ import annotations
 
 import os
 from datetime import datetime, timezone
+from pathlib import Path
 
 from fastmcp import FastMCP
 from starlette.requests import Request
-from starlette.responses import JSONResponse
+from starlette.responses import JSONResponse, PlainTextResponse
 
-from travelprep_mcp import __version__
+from travelprep_mcp import __version__, llm_discovery
 from travelprep_mcp.tools.account import account as account_impl
 from travelprep_mcp.tools.destination import destination as destination_impl
 from travelprep_mcp.tools.hotel_extras import hotel_extras as hotel_extras_impl
 from travelprep_mcp.tools.stays import stays as stays_impl
+
+_READ_ONLY = {"readonly": True}
+_SKILLS_DIR = Path(__file__).parent / "skills"
+_PRIMARY_SKILL = "travelprep-expert"
 
 mcp = FastMCP(
     name="travelprep-mcp",
@@ -47,7 +58,7 @@ mcp = FastMCP(
 )
 
 
-@mcp.tool()
+@mcp.tool(annotations=_READ_ONLY)
 async def stays(
     operation: str,
     provider: str,
@@ -79,7 +90,7 @@ async def stays(
     )
 
 
-@mcp.tool()
+@mcp.tool(annotations=_READ_ONLY)
 async def hotel_extras(
     operation: str,
     location: str | None = None,
@@ -116,7 +127,7 @@ async def hotel_extras(
     )
 
 
-@mcp.tool()
+@mcp.tool(annotations=_READ_ONLY)
 async def account(operation: str) -> dict:
     """Booking.com account access -- trips, wishlist, rewards.
 
@@ -129,7 +140,7 @@ async def account(operation: str) -> dict:
     return await account_impl(operation=operation)  # type: ignore[arg-type]
 
 
-@mcp.tool()
+@mcp.tool(annotations=_READ_ONLY)
 async def destination(
     operation: str,
     place: str,
@@ -144,6 +155,13 @@ async def destination(
         place=place,
         forecast_days=forecast_days,
     )
+
+
+@mcp.resource(f"skill://{_PRIMARY_SKILL}/SKILL.md")
+def get_travelprep_expert_skill() -> str:
+    """The travelprep-expert skill content, as an MCP resource."""
+    path = _SKILLS_DIR / _PRIMARY_SKILL / "SKILL.md"
+    return path.read_text(encoding="utf-8") if path.exists() else "not found"
 
 
 # --- REST layer for the webapp (HTTP transport only) -----------------------
@@ -184,14 +202,14 @@ async def api_capabilities(request: Request) -> JSONResponse:
                 "sampling": False,
                 "agentic_workflows": False,
                 "prompts": False,
-                "resources": False,
-                "skills": False,
+                "resources": True,
+                "skills": True,
             },
             "inventory": {
                 "workflow_tools": [],
                 "prompt_names": [],
-                "resource_uris": [],
-                "skill_uris": [],
+                "resource_uris": [f"skill://{_PRIMARY_SKILL}/SKILL.md"],
+                "skill_uris": [f"skill://{_PRIMARY_SKILL}/SKILL.md"],
             },
             "runtime": {
                 "transport": "dual",
@@ -221,6 +239,43 @@ async def api_tools(request: Request) -> JSONResponse:
             for t in tools
         ]
     )
+
+
+@mcp.custom_route("/api/skills", methods=["GET"])
+async def api_skills(request: Request) -> JSONResponse:
+    """List registered skills (WEBAPP_SOTA_STANDARDS.md §V)."""
+    if not _SKILLS_DIR.exists():
+        return JSONResponse({"skills": []})
+    skills = []
+    for skill_dir in sorted(_SKILLS_DIR.iterdir()):
+        skill_file = skill_dir / "SKILL.md"
+        if skill_file.exists():
+            first_line = skill_file.read_text(encoding="utf-8").splitlines()[0].lstrip("# ")
+            skills.append(
+                {
+                    "id": skill_dir.name,
+                    "name": skill_dir.name,
+                    "description": first_line,
+                    "uri": f"skill://{skill_dir.name}/SKILL.md",
+                }
+            )
+    return JSONResponse({"skills": skills})
+
+
+@mcp.custom_route("/skill/{skill_name}", methods=["GET"])
+async def get_skill(request: Request) -> PlainTextResponse:
+    """Raw SKILL.md content for one skill (WEBAPP_SOTA_STANDARDS.md §V)."""
+    skill_name = request.path_params["skill_name"]
+    skill_path = _SKILLS_DIR / skill_name / "SKILL.md"
+    if skill_path.exists():
+        return PlainTextResponse(skill_path.read_text(encoding="utf-8"))
+    return PlainTextResponse("not found", status_code=404)
+
+
+@mcp.custom_route("/api/llm/discover", methods=["GET"])
+async def api_llm_discover(request: Request) -> JSONResponse:
+    """Local Ollama/LM Studio auto-detection (WEBAPP_SOTA_STANDARDS.md §VI, 'Glom On')."""
+    return JSONResponse(await llm_discovery.discover())
 
 
 def main() -> None:

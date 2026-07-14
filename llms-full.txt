@@ -3,7 +3,14 @@
 Trip preparation MCP server. FastMCP 3.4+, Python 3.12+, dual transport
 (stdio default; HTTP `/mcp` on port 11099 via `MCP_TRANSPORT=http`).
 
+REST endpoints (HTTP mode only):
+    GET /api/capabilities  -- capability introspection (WEBAPP_STANDARDS.md S1.4)
+    GET /api/health        -- liveness
+    GET /api/tools         -- dynamic tool list
+
 ## Tool: stays
+
+Portmanteau for Airbnb and Booking.com search + details.
 
 ```
 stays(
@@ -12,8 +19,8 @@ stays(
     location: str | None = None,       # required for operation="search"
     listing_id: str | None = None,     # required for operation="details"
                                         # (airbnb: numeric id; booking: full hotel URL)
-    checkin: str | None = None,        # YYYY-MM-DD; required for provider="booking" search
-    checkout: str | None = None,       # YYYY-MM-DD; required for provider="booking" search
+    checkin: str | None = None,        # YYYY-MM-DD; required for provider="booking"
+    checkout: str | None = None,       # YYYY-MM-DD; required for provider="booking"
     adults: int = 1,
     children: int = 0,
     min_price: int | None = None,      # airbnb only
@@ -29,7 +36,37 @@ Known issues (confirmed live, not theoretical):
 - Airbnb location matching is loose (Photon -> Nominatim fallback, 25% bbox padding)
 - Booking.com bot-detects the scraper; expect occasional blocked-then-retried searches
 
+## Tool: hotel_extras
+
+Booking.com-only extras beyond basic search/details.
+
+```
+hotel_extras(
+    operation: "find_hotels" | "compare" | "check_availability" | "reviews" | "price_calendar",
+    location: str | None = None,
+    hotel_url: str | None = None,
+    hotel_urls: list[str] | None = None,
+    checkin: str | None = None,
+    checkout: str | None = None,
+    adults: int = 2,
+    rooms: int = 1,
+    filters: dict | None = None,
+    sort_by: str = "recent",
+    filter_by: str | None = None,
+    price_calendar_start: str | None = None,
+    price_calendar_nights: int = 14,
+) -> dict
+```
+
+All operations delegate to the same hotelzero subprocess as `stays(provider="booking")`.
+Wired from a confirmed `list_tools()` schema; not individually live-exercised.
+
+Echoes budget caps (300 EUR/night, 1500 EUR/trip) per result. No automatic flagging
+against those caps until upstream result shape is confirmed with a live call.
+
 ## Tool: destination
+
+Free-source destination info. No API keys required.
 
 ```
 destination(
@@ -48,12 +85,36 @@ All free, keyless sources:
 Returns `available: false` with a `reason` string per section on a miss,
 never fabricated data.
 
+## Tool: account
+
+Booking.com account access via a locally-persisted, isolated login session.
+
+```
+account(
+    operation: "login" | "status" | "trips" | "wishlist" | "rewards"
+) -> dict
+```
+
+Operations:
+- login: opens a headed browser window for interactive Booking.com login; session persists locally
+- status: checks whether a local session profile exists (does not confirm validity)
+- trips: past and upcoming bookings (parsing is an unverified first pass)
+- wishlist: saved properties (parsing is an unverified first pass)
+- rewards: Genius level / wallet / rewards balance (parsing is an unverified first pass)
+
+Uses an isolated Playwright profile under `~/.travelprep-mcp/booking-profile/`, not
+Sandra's default browser session. No booking-execution capability exists anywhere
+in this server -- see budget.py.
+
+## Budget
+
+Hardcoded spend caps: MAX_NIGHTLY_RATE_EUR = 300, MAX_TOTAL_TRIP_EUR = 1500.
+No booking-execution tool exists -- the server can search, inspect, and compare,
+but never purchase. This is a deliberate design choice documented in budget.py.
+
 ## Not yet implemented
 
-- Booking.com: `find_hotels` (80+ filters), `compare_hotels`,
-  `check_availability`, `get_reviews`, `get_price_calendar` -- all
-  confirmed present on the upstream server, none wired into `stays` yet
-- Webapp / Prefab UI cards
-- MCPB packaging / Tauri desktop wrapper
-- Destination sources beyond the four listed (no OpenStreetMap POI
-  layer, no visa/entry-requirement source, no currency conversion)
+- Webapp (scaffold exists: Vite+React+Tailwind, zero pages)
+- Prefab UI in-chat cards for list/status results
+- MCPB packaging
+- Tauri/NSIS desktop wrapper

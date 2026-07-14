@@ -1,11 +1,12 @@
 # travelprep-mcp
 
 **Trip preparation MCP server (v0.1.0)** -- FastMCP 3.4+, dual transport
-(stdio + HTTP `/mcp` on port **11099**). Three tools: `stays` (Airbnb +
+(stdio + HTTP `/mcp` on port **11099**). Four tools: `stays` (Airbnb +
 Booking.com, subprocess-wrapped open-source scrapers, no paid API keys),
 `hotel_extras` (Booking.com-only: filtered search, compare, availability,
-reviews, price calendar), and `destination` (free-source
-overview/weather/practical info -- no API keys at all).
+reviews, price calendar), `destination` (free-source
+overview/weather/practical info -- no API keys at all), and `account`
+(Booking.com login/trips/wishlist/rewards via isolated Playwright session).
 
 ## Status -- read this before trusting anything
 

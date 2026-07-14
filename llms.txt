@@ -5,14 +5,13 @@
 ## Tools
 
 - `stays(operation, provider, ...)` -- search or get details for Airbnb/Booking.com listings
+- `hotel_extras(operation, ...)` -- Booking.com-only extras: find_hotels, compare, check_availability, reviews, price_calendar
 - `destination(operation, place, forecast_days)` -- overview / weather / practical info for a place
-
-## Status
-
-v0.1.0. Both tools live-tested against real, unmocked sources 2026-07-14. No webapp yet -- stdio + HTTP `/mcp` (port 11099) only. See README.md "Status" table for exact per-piece state.
+- `account(operation)` -- Booking.com account: login, trips, wishlist, rewards
 
 ## Links
 
 - Repo: https://github.com/sandraschi/travelprep-mcp
 - README: https://github.com/sandraschi/travelprep-mcp/blob/main/README.md
+- Full reference: https://github.com/sandraschi/travelprep-mcp/blob/main/llms-full.txt
 - Install: https://github.com/sandraschi/travelprep-mcp/blob/main/INSTALL.md

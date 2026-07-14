@@ -12,3 +12,6 @@ webapp/dist/
 *.log
 .DS_Store
 *.bak
+native/target/
+native/gen/
+*.mcpb

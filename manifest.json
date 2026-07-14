@@ -1,0 +1,18 @@
+{
+  "name": "travelprep-mcp",
+  "version": "0.1.0",
+  "description": "Trip preparation MCP server: accommodation search on Airbnb and Booking.com, destination info from free keyless sources (Wikipedia, Wikivoyage, Open-Meteo, REST Countries), and Booking.com account access via an isolated Playwright login session",
+  "runtime": "python",
+  "entrypoint": "src/travelprep_mcp/server.py",
+  "transport": ["stdio", "http"],
+  "tools": ["stays", "hotel_extras", "destination", "account"],
+  "assets": {
+    "icon": "assets/icon.png",
+    "prompts": {
+      "system": "assets/prompts/system.md",
+      "user": "assets/prompts/user.md",
+      "examples": "assets/prompts/examples.json"
+    }
+  },
+  "categories": ["travel", "search"]
+}
