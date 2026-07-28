@@ -118,7 +118,9 @@ async def _weather(client: httpx.AsyncClient, place: str, days: int) -> dict[str
                 "date": date,
                 "temp_max_c": daily.get("temperature_2m_max", [None] * len(dates))[i],
                 "temp_min_c": daily.get("temperature_2m_min", [None] * len(dates))[i],
-                "precip_probability_pct": daily.get("precipitation_probability_max", [None] * len(dates))[i],
+                "precip_probability_pct": daily.get(
+                    "precipitation_probability_max", [None] * len(dates)
+                )[i],
             }
         )
     return {

@@ -10,7 +10,9 @@ from travelprep_mcp.tools.hotel_extras import hotel_extras
 @pytest.mark.asyncio
 async def test_find_hotels_delegates_correctly():
     mock_result = {"some": "data"}
-    with patch("travelprep_mcp.tools.hotel_extras.booking_client.find_hotels", new_callable=AsyncMock) as mock_find:
+    with patch(
+        "travelprep_mcp.tools.hotel_extras.booking_client.find_hotels", new_callable=AsyncMock
+    ) as mock_find:
         mock_find.return_value = mock_result
         result = await hotel_extras(
             operation="find_hotels",
@@ -45,7 +47,9 @@ async def test_find_hotels_missing_params():
 async def test_compare_delegates_correctly():
     mock_result = {"comparison": "done"}
     urls = ["https://booking.com/hotel/a", "https://booking.com/hotel/b"]
-    with patch("travelprep_mcp.tools.hotel_extras.booking_client.compare_hotels", new_callable=AsyncMock) as mock_cmp:
+    with patch(
+        "travelprep_mcp.tools.hotel_extras.booking_client.compare_hotels", new_callable=AsyncMock
+    ) as mock_cmp:
         mock_cmp.return_value = mock_result
         result = await hotel_extras(operation="compare", hotel_urls=urls)
     mock_cmp.assert_awaited_once_with(urls)
@@ -62,7 +66,10 @@ async def test_compare_missing_urls():
 @pytest.mark.asyncio
 async def test_check_availability_delegates_correctly():
     mock_result = {"available": True}
-    with patch("travelprep_mcp.tools.hotel_extras.booking_client.check_availability", new_callable=AsyncMock) as mock_avail:
+    with patch(
+        "travelprep_mcp.tools.hotel_extras.booking_client.check_availability",
+        new_callable=AsyncMock,
+    ) as mock_avail:
         mock_avail.return_value = mock_result
         result = await hotel_extras(
             operation="check_availability",
@@ -84,14 +91,20 @@ async def test_check_availability_delegates_correctly():
 
 @pytest.mark.asyncio
 async def test_check_availability_missing_params():
-    with pytest.raises(ValueError, match="check_availability requires hotel_url, checkin, checkout"):
-        await hotel_extras(operation="check_availability", hotel_url="https://booking.com/hotel/test")
+    with pytest.raises(
+        ValueError, match="check_availability requires hotel_url, checkin, checkout"
+    ):
+        await hotel_extras(
+            operation="check_availability", hotel_url="https://booking.com/hotel/test"
+        )
 
 
 @pytest.mark.asyncio
 async def test_reviews_delegates_correctly():
     mock_result = {"reviews": []}
-    with patch("travelprep_mcp.tools.hotel_extras.booking_client.get_reviews", new_callable=AsyncMock) as mock_rev:
+    with patch(
+        "travelprep_mcp.tools.hotel_extras.booking_client.get_reviews", new_callable=AsyncMock
+    ) as mock_rev:
         mock_rev.return_value = mock_result
         result = await hotel_extras(
             operation="reviews",
@@ -116,7 +129,9 @@ async def test_reviews_missing_url():
 @pytest.mark.asyncio
 async def test_price_calendar_delegates_correctly():
     mock_result = {"cheapest_dates": []}
-    with patch("travelprep_mcp.tools.hotel_extras.booking_client.price_calendar", new_callable=AsyncMock) as mock_cal:
+    with patch(
+        "travelprep_mcp.tools.hotel_extras.booking_client.price_calendar", new_callable=AsyncMock
+    ) as mock_cal:
         mock_cal.return_value = mock_result
         result = await hotel_extras(
             operation="price_calendar",
@@ -150,7 +165,9 @@ async def test_unknown_operation():
 
 @pytest.mark.asyncio
 async def test_budget_caps_echoed():
-    with patch("travelprep_mcp.tools.hotel_extras.booking_client.find_hotels", new_callable=AsyncMock) as mock_find:
+    with patch(
+        "travelprep_mcp.tools.hotel_extras.booking_client.find_hotels", new_callable=AsyncMock
+    ) as mock_find:
         mock_find.return_value = {}
         result = await hotel_extras(
             operation="find_hotels",

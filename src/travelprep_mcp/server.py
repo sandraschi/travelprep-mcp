@@ -41,7 +41,7 @@ from __future__ import annotations
 
 import os
 from contextlib import asynccontextmanager
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 import uvicorn
@@ -208,7 +208,7 @@ class _MCPWrapper:
 def build_app() -> FastAPI:
     """Build the FastAPI app: REST routes + mounted MCP streamable-HTTP transport."""
     global _start_time
-    _start_time = datetime.now(timezone.utc).timestamp()
+    _start_time = datetime.now(UTC).timestamp()
 
     mcp_http = mcp.http_app(path="/")
 
@@ -292,7 +292,7 @@ def build_app() -> FastAPI:
                 "transport": "dual",
                 "surface_mode": "portmanteau",
             },
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
         }
 
     @app.get("/api/health")
@@ -300,7 +300,7 @@ def build_app() -> FastAPI:
         return {
             "status": "ok",
             "version": __version__,
-            "uptime_seconds": int(datetime.now(timezone.utc).timestamp() - _start_time),
+            "uptime_seconds": int(datetime.now(UTC).timestamp() - _start_time),
         }
 
     @app.get("/api/tools")
