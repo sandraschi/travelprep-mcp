@@ -4,12 +4,14 @@
     Name         = 'travelprep-mcp'
     BackendPort  = 11099
     FrontendPort = 11100
-    HealthPath   = '/health'
+    HealthPath   = '/api/health'
     WebRoot      = 'webapp'
     Backend = @{
-        Kind = 'none'
+        Kind    = 'custom'
+        Command = "`$env:MCP_TRANSPORT='http'; uv run --no-sync --project '$PSScriptRoot' travelprep-mcp"
     }
     Frontend = @{
-        Kind = 'none'
+        Kind           = 'vite-npm'
+        PackageManager = 'npm'
     }
 }
